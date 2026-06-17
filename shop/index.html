@@ -58,7 +58,6 @@
 
     <div id="result">
         <div class="analysis-text" id="replyText"></div>
-        <!-- 巨大な画像データの代わりにドライブURLを隠し持たせる -->
         <img id="generatedImage" src="" alt="Translated Bouquet" data-drive-url="">
         
         <div class="card">
@@ -126,8 +125,6 @@
         loading.style.display = 'block';
         processBtn.disabled = true;
 
-        await new Promise(resolve => setTimeout(resolve, 100));
-
         try {
             const response = await fetch(GAS_URL, {
                 method: "POST",
@@ -138,12 +135,20 @@
             
             if (res.status === "RETRY_BLOCKED") return;
 
+            // ★追加：裏側でエラーが起きた場合に画面フリーズを防ぎ、アラートを出す
+            if (res.status === "ERROR") {
+                alert("バックエンド処理エラー:\n" + res.message);
+                inputArea.style.display = 'block';
+                loading.style.display = 'none';
+                processBtn.disabled = false;
+                return;
+            }
+
             if(res && res.imageUrl) {
                 loading.style.display = 'none';
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('replyText').innerText = res.reply;
                 
-                // ★画面表示にはBase64画像を使い、裏側(dataset)にドライブURLを隠し持たせる
                 const imgElement = document.getElementById('generatedImage');
                 imgElement.src = res.imageUrl;
                 imgElement.dataset.driveUrl = res.driveUrl; 
@@ -153,7 +158,7 @@
                 window.scrollTo({ top: document.getElementById('result').offsetTop, behavior: 'smooth' });
             }
         } catch (e) {
-            alert("通信プロトコルエラー。もう一度囁いてください。");
+            alert("通信プロトコルエラー。もう一度囁いてください。\n詳細: " + e.message);
             inputArea.style.display = 'block';
             loading.style.display = 'none';
             processBtn.disabled = false;
@@ -184,7 +189,6 @@
                         name: name, 
                         size: selectedSize, 
                         total: (selectedSize==="S"?5500:selectedSize==="M"?10000:15000),
-                        // ★巨大なBase64の代わりに、数文字のドライブURLだけを送信する！
                         driveUrl: document.getElementById('generatedImage').dataset.driveUrl,
                         historyText: document.getElementById('replyText').innerText
                     }
