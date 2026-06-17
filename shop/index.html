@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Concept Helix | 有限会社フローリストワタリ</title>
-    <!-- Faviconの設定が抜けていたので追加（一つ上の階層のimagesフォルダを参照） -->
     <link rel="icon" href="../images/favicon.ico">
     <style>
         :root { --bg: #050505; --neon: #39FF14; --gold: #D4AF37; --text: #e0e0e0; }
@@ -41,7 +40,6 @@
 <body>
 <div id="app">
     <div class="company-header">有限会社フローリストワタリ オーダーメイド・プロジェクト「電脳翻譯」</div>
-    <!-- ヘッダーの文字をクリックすると、一つ上の階層（トップページ）に戻れるようにリンクを追加しました -->
     <a href="../index.html" style="text-decoration: none;">
         <h1>Concept Bloom</h1>
     </a>
@@ -60,7 +58,8 @@
 
     <div id="result">
         <div class="analysis-text" id="replyText"></div>
-        <img id="generatedImage" src="" alt="Translated Bouquet">
+        <!-- 巨大な画像データの代わりにドライブURLを隠し持たせる -->
+        <img id="generatedImage" src="" alt="Translated Bouquet" data-drive-url="">
         
         <div class="card">
             <h2 style="font-size: 0.9em; color: var(--gold); margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 10px;">ご注文内容の最終確認</h2>
@@ -85,15 +84,12 @@
     </div>
 
     <footer>
-        <!-- 【修正箇所】絶対パスから、一つ上の階層（../）のlegal.htmlを参照する相対パスに修正 -->
         <a href="../legal.html" target="_blank">特定商取引法に基づく表記</a>
-        <!-- 運営会社は本体サイトへのリンクなので絶対パスのままでOK -->
         <a href="https://floristwatari.com/" target="_blank">運営会社情報</a>
     </footer>
 </div>
 
 <script>
-    // ※GASのURLとStripeのURLはそのまま保持しています
     const GAS_URL = "https://script.google.com/macros/s/AKfycby4e7FWHsPxxNVKqaY89B0db5vk8O1LihqLckE2kN0v7bM0OPhBhCX5KebNvOGjyHus/exec"; 
     const STRIPE_URLS = {
         "S": "https://buy.stripe.com/00w28r5pN7S07o41iO2Nq04",
@@ -146,7 +142,12 @@
                 loading.style.display = 'none';
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('replyText').innerText = res.reply;
-                document.getElementById('generatedImage').src = res.imageUrl;
+                
+                // ★画面表示にはBase64画像を使い、裏側(dataset)にドライブURLを隠し持たせる
+                const imgElement = document.getElementById('generatedImage');
+                imgElement.src = res.imageUrl;
+                imgElement.dataset.driveUrl = res.driveUrl; 
+                
                 document.getElementById('lotusWords').innerText = "「…翻訳は完了しました。解釈の相違はございませんでしょうか。」";
                 updateConfirmDisplay();
                 window.scrollTo({ top: document.getElementById('result').offsetTop, behavior: 'smooth' });
@@ -180,21 +181,30 @@
                     action: "sendOrder",
                     requestId: requestId,
                     orderData: {
-                        name: name, size: selectedSize, total: (selectedSize==="S"?5500:selectedSize==="M"?10000:15000),
-                        imageUrl: document.getElementById('generatedImage').src,
+                        name: name, 
+                        size: selectedSize, 
+                        total: (selectedSize==="S"?5500:selectedSize==="M"?10000:15000),
+                        // ★巨大なBase64の代わりに、数文字のドライブURLだけを送信する！
+                        driveUrl: document.getElementById('generatedImage').dataset.driveUrl,
                         historyText: document.getElementById('replyText').innerText
                     }
                 })
             });
             const res = await response.json();
+            
             if(res.status === "SUCCESS") {
                 orderBtn.innerText = "決済プロトコルを起動しました";
                 redirectMsg.style.display = "block";
                 setTimeout(() => { window.location.href = STRIPE_URLS[selectedSize]; }, 500);
+            } else {
+                alert("バックエンド処理エラー: " + res.message);
+                orderBtn.disabled = false;
+                orderBtn.innerText = "上記内容に同意して契約を確定する";
             }
         } catch(e) {
-            alert("通信エラー");
+            alert("通信エラー: " + e.toString());
             orderBtn.disabled = false;
+            orderBtn.innerText = "上記内容に同意して契約を確定する";
         }
     }
 </script>
