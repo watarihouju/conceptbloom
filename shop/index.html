@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Concept Helix | 有限会社フローリストワタリ</title>
+    <!-- Faviconの設定が抜けていたので追加（一つ上の階層のimagesフォルダを参照） -->
+    <link rel="icon" href="../images/favicon.ico">
     <style>
         :root { --bg: #050505; --neon: #39FF14; --gold: #D4AF37; --text: #e0e0e0; }
         body { background: var(--bg); color: var(--text); font-family: 'Yu Mincho', 'MS PMincho', serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
@@ -30,7 +32,8 @@
         .confirm-table { width: 100%; font-size: 0.8em; color: #aaa; margin-bottom: 25px; line-height: 1.8; border-top: 1px solid #333; padding-top: 20px; }
         .confirm-table b { color: var(--gold); font-weight: normal; }
         footer { margin-top: 60px; padding-bottom: 40px; border-top: 1px solid #222; padding-top: 20px; }
-        footer a { color: #666; font-size: 0.7em; text-decoration: none; margin: 0 10px; }
+        footer a { color: #666; font-size: 0.7em; text-decoration: none; margin: 0 10px; transition: 0.3s; }
+        footer a:hover { color: var(--neon); }
         @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -38,7 +41,10 @@
 <body>
 <div id="app">
     <div class="company-header">有限会社フローリストワタリ オーダーメイド・プロジェクト「電脳翻譯」</div>
-    <h1>Concept Bloom</h1>
+    <!-- ヘッダーの文字をクリックすると、一つ上の階層（トップページ）に戻れるようにリンクを追加しました -->
+    <a href="../index.html" style="text-decoration: none;">
+        <h1>Concept Bloom</h1>
+    </a>
     <div id="lotusWords" class="lotus-msg">「…あなたの想い、あるいは音色の記憶。その断片を私に預けていただけますか？」</div>
 
     <div class="card" id="inputArea">
@@ -79,12 +85,15 @@
     </div>
 
     <footer>
-        <a href="https://floristwatari.com/ConceptBloom/legal.html" target="_blank">特定商取引法に基づく表記</a>
+        <!-- 【修正箇所】絶対パスから、一つ上の階層（../）のlegal.htmlを参照する相対パスに修正 -->
+        <a href="../legal.html" target="_blank">特定商取引法に基づく表記</a>
+        <!-- 運営会社は本体サイトへのリンクなので絶対パスのままでOK -->
         <a href="https://floristwatari.com/" target="_blank">運営会社情報</a>
     </footer>
 </div>
 
 <script>
+    // ※GASのURLとStripeのURLはそのまま保持しています
     const GAS_URL = "https://script.google.com/macros/s/AKfycby4e7FWHsPxxNVKqaY89B0db5vk8O1LihqLckE2kN0v7bM0OPhBhCX5KebNvOGjyHus/exec"; 
     const STRIPE_URLS = {
         "S": "https://buy.stripe.com/00w28r5pN7S07o41iO2Nq04",

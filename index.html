@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Concept Bloom | Ether-Weaver 'LOTUS' | 紡がれる想いの色彩</title>
+    <!-- ルート階層なのでCSSとfaviconはそのままのパスでOK -->
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="images/favicon.ico">
     <style>
@@ -36,6 +37,7 @@
         <section class="hero">
             <div class="hero__bg"></div>
             <div class="hero__img-wrapper">
+                <!-- ルート階層なのでimagesフォルダのパスはそのまま -->
                 <img src="images/hero_ren.png" alt="Concept Bloom Ether-Weaver LOTUS" class="hero__img">
             </div>
             <div class="hero__text">
@@ -90,7 +92,8 @@
             <div class="container">
                 <h2 class="sec-ttl">MISSION: START</h2>
                 <p class="order__catch">あなたの想いを、今、色彩に翻譯しますか？</p>
-                <a href="../shop/index.html" class="btn btn--bloom">解釈を開始する</a>
+                <!-- 【修正箇所1】 "../shop/index.html"（一つ上の階層）になっていたものを修正。ルートからは直接 "shop/index.html" になります -->
+                <a href="shop/index.html" class="btn btn--bloom">解釈を開始する</a>
             </div>
         </section>
 
@@ -99,13 +102,15 @@
             <p class="footer__text" style="font-size: 0.8em; margin-top: 5px;">Operated by 有限会社フローリストワタリ</p>
             
             <div class="footer__legal">
-                <a href="https://floristwatari.com/ConceptBloom/legal.html">特定商取引法に基づく表記</a>
+                <!-- 【修正箇所2】 お名前.com時代の絶対パスを、サブドメイン環境で動く相対パスに修正 -->
+                <a href="legal.html">特定商取引法に基づく表記</a>
                 <a href="https://floristwatari.com/">運営会社公式サイト</a>
             </div>
         </footer>
 
     </div>
 
+    <!-- ルート階層なのでJSファイルはそのままのパスでOK -->
     <script src="script.js"></script>
 </body>
 </html>
