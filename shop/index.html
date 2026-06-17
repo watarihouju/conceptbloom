@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Concept Helix | 有限会社フローリストワタリ</title>
+    <style>
+        :root { --bg: #050505; --neon: #39FF14; --gold: #D4AF37; --text: #e0e0e0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Yu Mincho', 'MS PMincho', serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
+        #app { width: 95%; max-width: 600px; padding: 40px 20px; text-align: center; }
+        .company-header { font-size: 0.6em; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 10px; opacity: 0.8; }
+        h1 { color: var(--gold); letter-spacing: 0.4em; font-weight: 200; border-bottom: 1px solid var(--gold); padding-bottom: 20px; margin-bottom: 40px; margin-top: 0; }
+        .lotus-msg { color: var(--neon); font-style: italic; min-height: 4em; margin: 30px 0; line-height: 2; font-size: 0.9em; }
+        .card { background: rgba(20,20,20,0.95); border: 1px solid #333; padding: 30px; margin-bottom: 30px; text-align: left; }
+        label { font-size: 0.75em; color: var(--gold); letter-spacing: 0.1em; display: block; margin-bottom: 10px; }
+        input[type="text"] { background: #000; border: 1px solid #444; color: #fff; width: 100%; padding: 15px; margin-bottom: 25px; box-sizing: border-box; font-family: inherit; font-size: 1em; }
+        .size-selector { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .size-option { display: flex; align-items: center; background: #111; border: 1px solid #444; padding: 15px; cursor: pointer; transition: 0.3s; }
+        .size-option:hover { border-color: var(--gold); }
+        .size-option input { margin-right: 15px; accent-color: var(--gold); transform: scale(1.2); }
+        .size-option.active { border-color: var(--neon); background: #1a1a1a; }
+        button { background: transparent; border: 1px solid var(--gold); color: var(--gold); width: 100%; padding: 18px; cursor: pointer; letter-spacing: 0.3em; transition: 0.4s; font-weight: bold; font-size: 1em; }
+        button:hover { background: var(--gold); color: #000; box-shadow: 0 0 15px var(--gold); }
+        button:disabled { border-color: #444; color: #444; cursor: not-allowed; opacity: 0.6; }
+        #loading { display: none; margin: 30px 0; }
+        .loading-dots { font-size: 0.8em; color: var(--neon); animation: pulse 1.5s infinite; letter-spacing: 0.2em; }
+        #result { display: none; margin-top: 40px; animation: fadeIn 2s ease; }
+        .analysis-text { border-left: 2px solid var(--neon); padding-left: 20px; font-size: 0.9em; line-height: 2; color: #ccc; margin-bottom: 30px; white-space: pre-wrap; text-align: left; }
+        img { width: 100%; border: 1px solid var(--gold); margin-bottom: 30px; }
+        .confirm-table { width: 100%; font-size: 0.8em; color: #aaa; margin-bottom: 25px; line-height: 1.8; border-top: 1px solid #333; padding-top: 20px; }
+        .confirm-table b { color: var(--gold); font-weight: normal; }
+        footer { margin-top: 60px; padding-bottom: 40px; border-top: 1px solid #222; padding-top: 20px; }
+        footer a { color: #666; font-size: 0.7em; text-decoration: none; margin: 0 10px; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="company-header">有限会社フローリストワタリ オーダーメイド・プロジェクト「電脳翻譯」</div>
+    <h1>Concept Bloom</h1>
+    <div id="lotusWords" class="lotus-msg">「…あなたの想い、あるいは音色の記憶。その断片を私に預けていただけますか？」</div>
+
+    <div class="card" id="inputArea">
+        <label>【概念入力：CONCEPT】</label>
+        <input type="text" id="userMessage" placeholder="推しの御名前や作品名、特定の楽曲名を入力してください。">
+        <button type="button" id="processBtn" onclick="processRequest()">想いを具現化する</button>
+    </div>
+
+    <div id="loading">
+        <div class="loading-dots">>>> 概念を解析中... 翻訳プロトコルを実行中...</div>
+        <p style="font-size: 0.6em; color: #666; margin-top: 10px;">※想いの具現化には20秒ほど時間を要します。そのままお待ちください。</p>
+    </div>
+
+    <div id="result">
+        <div class="analysis-text" id="replyText"></div>
+        <img id="generatedImage" src="" alt="Translated Bouquet">
+        
+        <div class="card">
+            <h2 style="font-size: 0.9em; color: var(--gold); margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 10px;">ご注文内容の最終確認</h2>
+            <label>【契約者名：NAME】</label>
+            <input type="text" id="orderName" placeholder="フルネームをご記入ください">
+            <label>【規模：SIZE】</label>
+            <div class="size-selector">
+                <label class="size-option"><input type="radio" name="size" value="S" onchange="updateConfirmDisplay()"> S size (5,500円)</label>
+                <label class="size-option active"><input type="radio" name="size" value="M" checked onchange="updateConfirmDisplay()"> M size (10,000円)</label>
+                <label class="size-option"><input type="radio" name="size" value="L" onchange="updateConfirmDisplay()"> L size (15,000円)</label>
+            </div>
+            <div class="confirm-table">
+                <p>■ <b>注文数量：</b>＜Concept Helix＞　1点</p>
+                <p>■ <b>販売価格：</b><span id="confirmPrice" style="font-weight: bold; color: #fff;">10,000</span>円（税込・送料込）</p>
+                <p>■ <b>支払時期：</b>クレジットカード決済（即時）</p>
+                <p>■ <b>引渡時期：</b>商品は決済後マテリアルの発注開始。7営業日以内に発送。</p>
+                <p>■ <b>解約条件：</b>受注生産・生花の性質上、決済後のキャンセル・返品不可。不良品は24時間以内に要連絡。</p>
+            </div>
+            <button type="button" id="orderBtn" onclick="sendOrder(event)">上記内容に同意して契約を確定する</button>
+            <p id="redirectMsg" style="font-size: 0.6em; color: var(--neon); margin-top: 15px; display: none; text-align: center;">Stripe決済ページへ安全に転送しています。そのままお待ちください...</p>
+        </div>
+    </div>
+
+    <footer>
+        <a href="https://floristwatari.com/ConceptBloom/legal.html" target="_blank">特定商取引法に基づく表記</a>
+        <a href="https://floristwatari.com/" target="_blank">運営会社情報</a>
+    </footer>
+</div>
+
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycby4e7FWHsPxxNVKqaY89B0db5vk8O1LihqLckE2kN0v7bM0OPhBhCX5KebNvOGjyHus/exec"; 
+    const STRIPE_URLS = {
+        "S": "https://buy.stripe.com/00w28r5pN7S07o41iO2Nq04",
+        "M": "https://buy.stripe.com/8x25kD6tRgow6k05z42Nq05",
+        "L": "https://buy.stripe.com/7sYfZh8BZ5JScIobXs2Nq06"
+    };
+
+    function updateConfirmDisplay() {
+        const radios = document.getElementsByName('size');
+        let selectedSize = "M";
+        for (let r of radios) {
+            if (r.checked) {
+                selectedSize = r.value;
+                r.parentElement.classList.add('active');
+            } else {
+                r.parentElement.classList.remove('active');
+            }
+        }
+        const prices = { "S": "5,500", "M": "10,000", "L": "15,000" };
+        document.getElementById('confirmPrice').innerText = prices[selectedSize];
+    }
+
+    async function processRequest() {
+        const msgInput = document.getElementById('userMessage');
+        const msg = msgInput ? msgInput.value : "";
+        if(!msg) return;
+        
+        const processBtn = document.getElementById('processBtn');
+        const loading = document.getElementById('loading');
+        const inputArea = document.getElementById('inputArea');
+        const requestId = "REQ_" + Date.now() + "_" + Math.random().toString(36).substring(2, 10);
+
+        inputArea.style.display = 'none';
+        loading.style.display = 'block';
+        processBtn.disabled = true;
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        try {
+            const response = await fetch(GAS_URL, {
+                method: "POST",
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: "processRequest", userMessage: msg, requestId: requestId })
+            });
+            const res = await response.json();
+            
+            if (res.status === "RETRY_BLOCKED") return;
+
+            if(res && res.imageUrl) {
+                loading.style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('replyText').innerText = res.reply;
+                document.getElementById('generatedImage').src = res.imageUrl;
+                document.getElementById('lotusWords').innerText = "「…翻訳は完了しました。解釈の相違はございませんでしょうか。」";
+                updateConfirmDisplay();
+                window.scrollTo({ top: document.getElementById('result').offsetTop, behavior: 'smooth' });
+            }
+        } catch (e) {
+            alert("通信プロトコルエラー。もう一度囁いてください。");
+            inputArea.style.display = 'block';
+            loading.style.display = 'none';
+            processBtn.disabled = false;
+        }
+    }
+
+    async function sendOrder(event) {
+        if (event) event.preventDefault();
+        const name = document.getElementById('orderName').value;
+        if(!name) return alert("お名前をご記入ください。");
+
+        const selectedSize = document.querySelector('input[name="size"]:checked').value;
+        const orderBtn = document.getElementById('orderBtn');
+        const redirectMsg = document.getElementById('redirectMsg');
+        const requestId = "ORD_" + Date.now();
+
+        orderBtn.disabled = true;
+        orderBtn.innerText = "契約内容を電脳空間に記録中...";
+
+        try {
+            const response = await fetch(GAS_URL, {
+                method: "POST",
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action: "sendOrder",
+                    requestId: requestId,
+                    orderData: {
+                        name: name, size: selectedSize, total: (selectedSize==="S"?5500:selectedSize==="M"?10000:15000),
+                        imageUrl: document.getElementById('generatedImage').src,
+                        historyText: document.getElementById('replyText').innerText
+                    }
+                })
+            });
+            const res = await response.json();
+            if(res.status === "SUCCESS") {
+                orderBtn.innerText = "決済プロトコルを起動しました";
+                redirectMsg.style.display = "block";
+                setTimeout(() => { window.location.href = STRIPE_URLS[selectedSize]; }, 500);
+            }
+        } catch(e) {
+            alert("通信エラー");
+            orderBtn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

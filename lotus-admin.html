@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotus Admin Console</title>
+    <style>
+        body { background: #0a0a0a; color: #d4af37; font-family: 'Georgia', serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { border: 1px solid #d4af37; padding: 40px; border-radius: 10px; background: rgba(212, 175, 55, 0.05); text-align: center; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+        h1 { font-weight: normal; letter-spacing: 5px; margin-bottom: 30px; }
+        .status-badge { padding: 5px 15px; border-radius: 20px; font-size: 0.8em; margin-bottom: 20px; display: inline-block; }
+        .on { background: #1a4d1a; color: #39ff14; }
+        .off { background: #4d1a1a; color: #ff3131; }
+        button { background: transparent; border: 1px solid #d4af37; color: #d4af37; padding: 10px 25px; cursor: pointer; transition: 0.3s; margin: 10px; font-family: serif; }
+        button:hover { background: #d4af37; color: #000; }
+        #log { font-size: 0.7em; color: #888; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>LOTUS CONTROL</h1>
+        <div id="status-display" class="status-badge off">AUTO POST: UNKNOWN</div>
+        <div>
+            <button onclick="updateFlag('ON')">ENABLE AUTO POST</button>
+            <button onclick="updateFlag('OFF')">DISABLE AUTO POST</button>
+        </div>
+        <div id="log">Waiting for command...</div>
+    </div>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycby4e7FWHsPxxNVKqaY89B0db5vk8O1LihqLckE2kN0v7bM0OPhBhCX5KebNvOGjyHus/exec";
+
+        function updateFlag(state) {
+            const log = document.getElementById('log');
+            log.innerText = "Connecting to Ether...";
+            
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "setFlag", value: state })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const status = document.getElementById('status-display');
+                status.innerText = "AUTO POST: " + state;
+                status.className = "status-badge " + state.toLowerCase();
+                log.innerText = "Protocol updated: " + state;
+            })
+            .catch(err => {
+                log.innerText = "Error: Connection lost.";
+                console.error(err);
+            });
+        }
+    </script>
+</body>
+</html>
